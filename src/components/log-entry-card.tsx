@@ -1,7 +1,7 @@
 "use client";
 
-import { format } from "date-fns";
 import { ArrowUpRight, Clock } from "lucide-react";
+import { formatDate } from "@/lib/format-date";
 import type { ShippingLogDTO } from "@/lib/types";
 import { STATUS_META } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
@@ -55,7 +55,7 @@ export function LogEntryCard({
             </Badge>
           </div>
           <time className="font-mono text-xs text-muted-foreground">
-            {format(new Date(log.createdAt), "MMM d, yyyy")}
+            {formatDate(log.createdAt)}
           </time>
         </div>
         <h3 className="mt-3 text-sm font-semibold leading-snug tracking-tight">
@@ -100,7 +100,7 @@ export function LogEntryCard({
           </span>
         </div>
         <time className="font-mono text-xs text-muted-foreground">
-          {format(new Date(log.createdAt), "MMM d, yyyy")}
+          {formatDate(log.createdAt)}
         </time>
       </header>
 

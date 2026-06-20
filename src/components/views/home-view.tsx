@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowRight, Terminal, Quote } from "lucide-react";
-import { format } from "date-fns";
+import { formatDateLog } from "@/lib/format-date";
 import { useViewStore } from "@/lib/store";
 import { HERO, MANIFESTO, CTA, SEED_LOGS } from "@/lib/content";
 import { STATUS_META } from "@/lib/types";
@@ -79,7 +79,7 @@ export function HomeView() {
                 return (
                   <div key={l.id} className="flex items-start gap-3">
                     <span className="shrink-0 text-muted-foreground">
-                      {format(new Date(l.createdAt), "yyyy-MM-dd")}
+                      {formatDateLog(l.createdAt)}
                     </span>
                     <span
                       className={cn(

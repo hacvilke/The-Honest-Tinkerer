@@ -40,10 +40,22 @@ export function SiteFooter() {
           </nav>
         </div>
 
-        <div className="mt-8 border-t border-border/60 pt-5">
+        <div className="mt-8 flex flex-col gap-3 border-t border-border/60 pt-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="font-mono text-xs text-muted-foreground/70">
             {FOOTER.built}
           </p>
+          <a
+            href="https://app.netlify.com/projects/the-honest-tinkerer/deploys"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0"
+          >
+            <img
+              src="https://api.netlify.com/api/v1/badges/6f42d995-9b08-41bd-a584-ea470a878826/deploy-status"
+              alt="Netlify deploy status"
+              className="h-5"
+            />
+          </a>
         </div>
       </div>
     </footer>

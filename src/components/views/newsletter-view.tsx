@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { format } from "date-fns";
 import {
   Mail,
   Send,
@@ -13,6 +12,7 @@ import {
   Skull,
   Newspaper,
 } from "lucide-react";
+import { formatDate } from "@/lib/format-date";
 import { toast } from "sonner";
 import { NEWSLETTER, CTA } from "@/lib/content";
 import { useNewsletterLatest, useBroadcasts, useSendBroadcast } from "@/hooks/use-newsletter";
@@ -274,7 +274,7 @@ export function NewsletterView() {
                       </p>
                     </div>
                     <time className="font-mono text-xs text-muted-foreground">
-                      {format(new Date(b.sentAt), "MMM d, yyyy")}
+                      {formatDate(b.sentAt)}
                     </time>
                   </div>
                 </div>

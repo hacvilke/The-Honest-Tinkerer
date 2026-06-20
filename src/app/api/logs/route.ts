@@ -55,7 +55,10 @@ export async function GET(request: Request) {
   } catch (err) {
     console.error("[GET /api/logs] failed:", err);
     return NextResponse.json(
-      { error: "Failed to load shipping logs." },
+      {
+        error: "Failed to load shipping logs.",
+        detail: err instanceof Error ? err.message : String(err),
+      },
       { status: 500 }
     );
   }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { format } from "date-fns";
 import {
   Filter,
   RotateCcw,
@@ -12,6 +11,7 @@ import {
   Clock,
   Play,
 } from "lucide-react";
+import { formatDate, formatDateShort } from "@/lib/format-date";
 import { SEED_LOGS } from "@/lib/content";
 import {
   STATUS_ORDER,
@@ -79,7 +79,7 @@ function LogListItem({
           </span>
         </div>
         <time className="font-mono text-[10px] text-muted-foreground/80">
-          {format(new Date(log.createdAt), "MMM d")}
+          {formatDateShort(log.createdAt)}
         </time>
       </div>
       <p
@@ -439,7 +439,7 @@ function LogDetail({
           </span>
         </div>
         <time className="font-mono text-xs text-muted-foreground">
-          {format(new Date(log.createdAt), "MMM d, yyyy")}
+          {formatDate(log.createdAt)}
         </time>
       </header>
 

@@ -89,7 +89,10 @@ export async function GET() {
   } catch (err) {
     console.error("[GET /api/newsletter/latest] failed:", err);
     return NextResponse.json(
-      { error: "Failed to render the latest issue." },
+      {
+        error: "Failed to render the latest issue.",
+        detail: err instanceof Error ? err.message : String(err),
+      },
       { status: 500 }
     );
   }

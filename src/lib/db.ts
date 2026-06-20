@@ -2,16 +2,17 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaLibSQL } from "@prisma/adapter-libsql";
 
 /**
- * Database client.
+ * Database client — lazy-initialized via a Proxy so that a missing DB config
+ * doesn't crash the serverless function at import time. The client is only
+ * created on first query, which means any "database not configured" error
+ * surfaces inside the route handler's try/catch (returning a helpful 500)
+ * instead of killing the function before it can respond.
  *
  * Two modes, picked by environment:
  *
  * 1. Hosted (Netlify / production) — set TURSO_DATABASE_URL + TURSO_AUTH_TOKEN.
  *    Uses the libSQL driver adapter against Turso (SQLite-compatible, hosted),
- *    so subscribers + broadcasts actually persist across serverless cold starts.
- *    If these vars are set in production but missing/empty, we throw loudly
- *    rather than silently fall back to an ephemeral local file (that would
- *    lose every subscriber between invocations — the wrong kind of quiet).
+ *    so subscribers + broadcasts persist across serverless cold starts.
  *
  * 2. Local dev — falls back to the file SQLite at DATABASE_URL
  *    (file:./db/custom.db). No Turso account needed.
@@ -32,11 +33,9 @@ function createPrismaClient(): PrismaClient {
   }
 
   if (process.env.NODE_ENV === "production") {
-    // In production without Turso configured, refuse to start — a local file
-    // on Netlify's ephemeral filesystem would silently lose all writes.
     throw new Error(
-      "Database not configured for production: set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN (Turso libSQL). " +
-        "See netlify.toml for required environment variables."
+      "Database not configured for production: set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN env vars on Netlify. " +
+        "See netlify.toml for the full list of required environment variables."
     );
   }
 
@@ -48,7 +47,16 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-export const db = globalForPrisma.prisma ?? createPrismaClient();
+// Lazy singleton — the Proxy intercepts the first property access (e.g.
+// `db.shippingLog`) and creates the client at that point, not at import time.
+let _client: PrismaClient | undefined;
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db;
-
+export const db = new Proxy({} as PrismaClient, {
+  get(_target, prop) {
+    if (!_client) {
+      _client = globalForPrisma.prisma ?? createPrismaClient();
+      if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = _client;
+    }
+    return Reflect.get(_client, prop);
+  },
+});

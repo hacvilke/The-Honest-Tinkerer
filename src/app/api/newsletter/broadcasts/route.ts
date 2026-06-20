@@ -31,7 +31,10 @@ export async function GET() {
   } catch (err) {
     console.error("[GET /api/newsletter/broadcasts] failed:", err);
     return NextResponse.json(
-      { error: "Failed to load the broadcast archive." },
+      {
+        error: "Failed to load the broadcast archive.",
+        detail: err instanceof Error ? err.message : String(err),
+      },
       { status: 500 }
     );
   }

@@ -49,13 +49,16 @@ function verify(token: string): string | null {
 
 /** Validate email + password against env vars. */
 export function checkAdminCredentials(email: string, password: string): boolean {
-  const adminEmail = process.env.EMAIL_ADMIN;
-  const adminPass = process.env.PASSWORD_ADMIN;
+  const adminEmail = process.env.EMAIL_ADMIN?.trim();
+  const adminPass = process.env.PASSWORD_ADMIN?.trim();
   if (!adminEmail || !adminPass) return false;
+  // Email is case-insensitive; compare lowercased.
+  const emailLower = email.trim().toLowerCase();
+  const adminEmailLower = adminEmail.toLowerCase();
   try {
     const emailOk =
-      email.length === adminEmail.length &&
-      timingSafeEqual(Buffer.from(email), Buffer.from(adminEmail));
+      emailLower.length === adminEmailLower.length &&
+      timingSafeEqual(Buffer.from(emailLower), Buffer.from(adminEmailLower));
     const passOk =
       password.length === adminPass.length &&
       timingSafeEqual(Buffer.from(password), Buffer.from(adminPass));

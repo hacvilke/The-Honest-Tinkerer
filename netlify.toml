@@ -1,0 +1,56 @@
+# Netlify deployment config for The Honest Tinkerer.
+#
+# REQUIRED environment variables (set in Netlify UI → Site settings → Environment):
+#   TURSO_DATABASE_URL  — e.g. libsql://<your-db>.turso.io   (hosted SQLite)
+#   TURSO_AUTH_TOKEN    — a Turso access token for that DB
+#   SMTP_HOST           — smtp.gmail.com
+#   SMTP_PORT           — 465
+#   SMTP_USER           — the Gmail address sending the newsletter
+#   SMTP_PASS           — a Gmail App Password (not your account password)
+#
+# Optional:
+#   DATABASE_URL        — leave UNSET on Netlify; the libSQL adapter (TURSO_*)
+#                        takes over at runtime. The schema's fallback keeps
+#                        `prisma generate` working without it.
+#
+# ── Database setup (one-time) ────────────────────────────────────────────────
+# 1. Install Turso CLI:       https://docs.turso.tech/cli
+# 2. Create the DB:            turso db create honest-tinkerer
+# 3. Get the URL:              turso db show honest-tinkerer --url
+# 4. Create a token:           turso db tokens create honest-tinkerer
+# 5. Push the schema to Turso: bun run db:sql | turso db shell honest-tinkerer
+#    (db:sql emits the CREATE TABLE statements via prisma migrate diff)
+# 6. Put the URL + token into Netlify env vars (TURSO_DATABASE_URL / TURSO_AUTH_TOKEN)
+#
+# ── Build ────────────────────────────────────────────────────────────────────
+# The build generates the Prisma client, then builds Next.js. The
+# @netlify/plugin-nextjs turns the .next output into serverless functions
+# (API routes, SSR pages) automatically.
+
+[build]
+  command = "bunx prisma generate && bunx next build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+  # Placeholder so `prisma generate` succeeds during build (Prisma's env()
+  # requires DATABASE_URL to exist). At runtime the libSQL adapter connects
+  # via TURSO_DATABASE_URL instead, so this file path is never actually used.
+  DATABASE_URL = "file:./db/local.db"
+  # Netlify auto-detects bun from bun.lock. Pin the version if you like:
+  # BUN_VERSION = "1.3"
+
+# Official Next.js plugin — handles SSR, API routes, image optimization, and
+# client-side routing fallbacks. Declared explicitly (also auto-detected when
+# the package is present, but being explicit avoids surprises).
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# ── Security headers ─────────────────────────────────────────────────────────
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"

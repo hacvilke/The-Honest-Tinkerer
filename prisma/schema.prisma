@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  // Local dev: DATABASE_URL=file:./db/custom.db (set in .env).
+  // Netlify: DATABASE_URL is set to a placeholder in netlify.toml's build
+  // environment so `prisma generate` succeeds; at runtime the libSQL driver
+  // adapter in src/lib/db.ts connects via TURSO_DATABASE_URL instead.
+  url = env("DATABASE_URL")
+}
+
+// Public diary of project builds, dead ends, and minor victories.
+model ShippingLog {
+  id        String   @id @default(cuid())
+  title     String
+  goal      String
+  techStack String
+  wall      String
+  pivot     String
+  metric    String
+  // SHIPPED | FAILED | PIVOTED | IN_PROGRESS
+  status    String
+  // comma-separated tool tags, e.g. "Google Sheets,Claude"
+  toolStack String
+  // human-readable bucket, e.g. "< 1 hour", "1-4 hours", "1 day", "1 week+"
+  timeSpent String
+  // optional demo kind key, e.g. "bluevibe" — frontend renders an embedded
+  // interactive demo + external link when this is set. null for most entries.
+  demo      String?
+  createdAt DateTime @default(now())
+}
+
+model Subscriber {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  // Double opt-in: null until the subscriber clicks the verify link we email
+  // them. Broadcasts only go to verified addresses.
+  verifyToken String?
+  verifiedAt  DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+// The newsletter outbox — one row per "sent" Friday Log Dump issue.
+// Simulated send (no SMTP in this sandbox), but the loop is real:
+// the latest shipping log is rendered into an email, and "sending"
+// records the issue here with the recipient count at send time.
+model Broadcast {
+  id            String   @id @default(cuid())
+  issue         Int      @unique
+  subject       String
+  logId         String
+  logTitle      String
+  recipientCount Int
+  sentAt        DateTime @default(now())
+}

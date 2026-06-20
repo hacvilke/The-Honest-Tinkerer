@@ -63,4 +63,4 @@ server.log
 /.zscripts/
 /worklog.md
 /download/
-/Caddyfile
+/Caddyfileupload/

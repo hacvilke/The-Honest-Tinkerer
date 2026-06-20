@@ -9,6 +9,7 @@ import { HomeView } from "@/components/views/home-view";
 import { LogView } from "@/components/views/log-view";
 import { StackView } from "@/components/views/stack-view";
 import { NewsletterView } from "@/components/views/newsletter-view";
+import { AdminView } from "@/components/views/admin-view";
 import { AboutView } from "@/components/views/about-view";
 
 export default function Home() {
@@ -48,6 +49,7 @@ export default function Home() {
             {view === "log" && <LogView />}
             {view === "stack" && <StackView />}
             {view === "newsletter" && <NewsletterView />}
+            {view === "admin" && <AdminView />}
             {view === "about" && <AboutView />}
           </motion.div>
         </AnimatePresence>

@@ -7,6 +7,8 @@
 #   SMTP_PORT           — 465
 #   SMTP_USER           — the Gmail address sending the newsletter
 #   SMTP_PASS           — a Gmail App Password (not your account password)
+#   EMAIL_ADMIN         — the email that unlocks the admin dashboard
+#   PASSWORD_ADMIN      — the password for the admin dashboard
 #
 # Optional:
 #   DATABASE_URL        — leave UNSET on Netlify; the libSQL adapter (TURSO_*)

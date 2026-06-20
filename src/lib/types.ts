@@ -2,7 +2,7 @@ export type LogStatus = "SHIPPED" | "FAILED" | "PIVOTED" | "IN_PROGRESS";
 
 export type TimeBucket = "< 1 hour" | "1-4 hours" | "1 day" | "1 week+";
 
-export type ViewId = "home" | "log" | "stack" | "newsletter" | "about";
+export type ViewId = "home" | "log" | "stack" | "newsletter" | "admin" | "about";
 
 export interface ShippingLog {
   id: string;

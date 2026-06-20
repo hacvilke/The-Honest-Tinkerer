@@ -37,6 +37,12 @@ export function SiteFooter() {
                 {link.label}
               </button>
             ))}
+            <button
+              onClick={() => setView("admin")}
+              className="text-left text-sm text-muted-foreground/50 transition-colors hover:text-foreground"
+            >
+              Admin
+            </button>
           </nav>
         </div>
 

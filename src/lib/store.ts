@@ -9,7 +9,7 @@ interface ViewState {
   hydrateFromHash: () => void;
 }
 
-const VALID: ViewId[] = ["home", "log", "stack", "newsletter", "about"];
+const VALID: ViewId[] = ["home", "log", "stack", "newsletter", "admin", "about"];
 
 function parseHash(): ViewId {
   if (typeof window === "undefined") return "home";

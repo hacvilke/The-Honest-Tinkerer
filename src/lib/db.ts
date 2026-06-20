@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import { createClient } from "@libsql/client";
 import { PrismaLibSQL } from "@prisma/adapter-libsql";
 
 /**
@@ -24,9 +23,10 @@ function createPrismaClient(): PrismaClient {
   const tursoToken = process.env.TURSO_AUTH_TOKEN;
 
   if (tursoUrl && tursoToken) {
-    const libsql = createClient({ url: tursoUrl, authToken: tursoToken });
+    // PrismaLibSQL takes a Config object { url, authToken }, NOT a pre-created
+    // client. It creates + manages its own @libsql/client internally.
     return new PrismaClient({
-      adapter: new PrismaLibSQL(libsql),
+      adapter: new PrismaLibSQL({ url: tursoUrl, authToken: tursoToken }),
       log: ["error", "warn"],
     });
   }
@@ -51,3 +51,4 @@ const globalForPrisma = globalThis as unknown as {
 export const db = globalForPrisma.prisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db;
+

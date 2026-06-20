@@ -7,8 +7,8 @@
  *   bun run scripts/push-schema-to-turso.ts
  *
  * Emits the CREATE TABLE / CREATE INDEX SQL via `prisma migrate diff` and
- * executes it against Turso in one batched call. Safe to re-run: statements
- * that fail because the table/index already exists are reported and skipped.
+ * executes it against Turso. Safe to re-run: statements that fail because the
+ * table/index already exists are reported and skipped.
  *
  * The auth token is read from the environment only — never written to disk.
  */
@@ -26,15 +26,20 @@ if (!url || !token) {
 }
 
 // 1. Generate the full schema SQL from prisma/schema.prisma.
-const sql = execSync("bunx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script", {
-  encoding: "utf-8",
-});
+const raw = execSync(
+  "bunx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script",
+  { encoding: "utf-8" }
+);
 
-// 2. Split into individual statements (prisma emits semicolon-terminated).
+// 2. Strip comment lines, then split on semicolons into individual statements.
+const sql = raw
+  .split("\n")
+  .filter((l) => !l.trim().startsWith("--"))
+  .join("\n");
 const statements = sql
-  .split(/;\s*\n/)
+  .split(";")
   .map((s) => s.trim())
-  .filter((s) => s.length > 0 && !s.startsWith("--"));
+  .filter((s) => s.length > 0);
 
 console.log(`Generated ${statements.length} schema statements.`);
 console.log("Connecting to Turso:", url.replace(/\/\/.*@/, "//***@"));
@@ -50,16 +55,15 @@ for (const stmt of statements) {
   try {
     await client.execute(stmt);
     ok++;
-    console.log(`  ✓ ${preview}`);
+    console.log(`  \u2713 ${preview}`);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    // "already exists" is fine on a re-run.
     if (/already exists/i.test(msg)) {
       skipped++;
       console.log(`  - skip (already exists): ${preview}`);
     } else {
       errors.push(`${preview}\n    ${msg}`);
-      console.log(`  ✗ FAILED: ${preview}\n      ${msg}`);
+      console.log(`  \u2717 FAILED: ${preview}\n      ${msg}`);
     }
   }
 }
